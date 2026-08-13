@@ -1,0 +1,35 @@
+{
+  "kind": "collectionType",
+  "collectionName": "muscles",
+  "info": {
+    "singularName": "muscle",
+    "pluralName": "muscles",
+    "displayName": "Muscle"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "image": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    },
+    "exercise_muscles": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::exercise-muscle.exercise-muscle",
+      "mappedBy": "muscle"
+    }
+  }
+}

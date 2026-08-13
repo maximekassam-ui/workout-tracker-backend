@@ -1,0 +1,35 @@
+{
+  "kind": "collectionType",
+  "collectionName": "exercise_muscles",
+  "info": {
+    "singularName": "exercise-muscle",
+    "pluralName": "exercise-muscles",
+    "displayName": "Exercise Muscle"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "role": {
+      "type": "enumeration",
+      "required": true,
+      "enum": [
+        "PRIMARY",
+        "SECONDARY"
+      ]
+    },
+    "exercise": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::exercise.exercise",
+      "inversedBy": "exercise_muscles"
+    },
+    "muscle": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::muscle.muscle",
+      "inversedBy": "exercise_muscles"
+    }
+  }
+}

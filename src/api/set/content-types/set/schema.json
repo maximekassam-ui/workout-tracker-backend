@@ -1,0 +1,43 @@
+{
+  "kind": "collectionType",
+  "collectionName": "sets",
+  "info": {
+    "singularName": "set",
+    "pluralName": "sets",
+    "displayName": "Set"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "set_number": {
+      "type": "integer",
+      "required": true,
+      "min": 1
+    },
+    "reps": {
+      "type": "integer",
+      "min": 0
+    },
+    "load": {
+      "type": "decimal"
+    },
+    "duration": {
+      "type": "integer"
+    },
+    "distance": {
+      "type": "decimal"
+    },
+    "completed": {
+      "type": "boolean",
+      "default": false
+    },
+    "workout_exercise": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::workout-exercise.workout-exercise",
+      "inversedBy": "sets"
+    }
+  }
+}

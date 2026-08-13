@@ -1,0 +1,61 @@
+{
+  "kind": "collectionType",
+  "collectionName": "exercises",
+  "info": {
+    "singularName": "exercise",
+    "pluralName": "exercises",
+    "displayName": "Exercise"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "text"
+    },
+    "image": {
+      "type": "media",
+      "multiple": true,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    },
+    "measurement_type": {
+      "type": "enumeration",
+      "required": true,
+      "enum": [
+        "WEIGHT_REPS",
+        "BODYWEIGHT_REPS",
+        "REPS",
+        "TIME",
+        "DISTANCE"
+      ]
+    },
+    "exercise_muscles": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::exercise-muscle.exercise-muscle",
+      "mappedBy": "exercise"
+    },
+    "categories": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::category.category",
+      "mappedBy": "exercises"
+    },
+    "program_exercises": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::program-exercise.program-exercise",
+      "mappedBy": "exercise"
+    }
+  }
+}
