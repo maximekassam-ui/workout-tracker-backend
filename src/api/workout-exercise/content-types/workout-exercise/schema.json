@@ -72,6 +72,13 @@
     "override_distance": {
       "type": "decimal",
       "min": 0
+    },
+    "exercise": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::exercise.exercise",
+      "required": true,
+      "inversedBy": "workout_exercises"
     }
   }
 }

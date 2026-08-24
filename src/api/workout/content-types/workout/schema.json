@@ -38,6 +38,18 @@
       "relation": "oneToMany",
       "target": "api::workout-exercise.workout-exercise",
       "mappedBy": "workout"
+    },
+    "workout_status": {
+      "type": "enumeration",
+      "default": "in_progress",
+      "enum": [
+        "in_progress",
+        "completed",
+        "cancelled"
+      ]
+    },
+    "duration": {
+      "type": "integer"
     }
   }
 }

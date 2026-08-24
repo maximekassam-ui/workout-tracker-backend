@@ -56,6 +56,12 @@
       "relation": "oneToMany",
       "target": "api::program-exercise.program-exercise",
       "mappedBy": "exercise"
+    },
+    "workout_exercises": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::workout-exercise.workout-exercise",
+      "mappedBy": "exercise"
     }
   }
 }

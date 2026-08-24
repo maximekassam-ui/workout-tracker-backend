@@ -555,6 +555,10 @@ export interface ApiExerciseExercise extends Struct.CollectionTypeSchema {
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    workout_exercises: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::workout-exercise.workout-exercise'
+    >;
   };
 }
 
@@ -774,6 +778,8 @@ export interface ApiWorkoutExerciseWorkoutExercise
       ['PENDING', 'COMPLETED', 'SKIPPED']
     > &
       Schema.Attribute.DefaultTo<'PENDING'>;
+    exercise: Schema.Attribute.Relation<'manyToOne', 'api::exercise.exercise'> &
+      Schema.Attribute.Required;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -893,6 +899,7 @@ export interface ApiWorkoutWorkout extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    duration: Schema.Attribute.Integer;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -913,6 +920,10 @@ export interface ApiWorkoutWorkout extends Struct.CollectionTypeSchema {
       'oneToMany',
       'api::workout-exercise.workout-exercise'
     >;
+    workout_status: Schema.Attribute.Enumeration<
+      ['in_progress', 'completed', 'cancelled']
+    > &
+      Schema.Attribute.DefaultTo<'in_progress'>;
     workout_template: Schema.Attribute.Relation<
       'manyToOne',
       'api::workout-template.workout-template'
