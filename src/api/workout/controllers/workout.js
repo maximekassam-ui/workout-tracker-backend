@@ -92,22 +92,42 @@ module.exports = createCoreController("api::workout.workout", ({ strapi }) => ({
                   "api::workout-exercise.workout-exercise",
                 );
 
+                const newWorkoutExercises = [];
+
                 for (const currentProgramExercise of existingProgramExercise) {
                   // console.log(currentProgramExercise);
 
                   const newWorkoutExercise = await workoutExercise.create({
                     data: {
-                      order: programExercise.order ?? 0,
+                      order: currentProgramExercise.order ?? 0,
                       execution_status: "PENDING",
                       was_modified: false,
                       workout: newWorkout.documentId,
-                      program_exercise: programExercise.documentId,
+                      program_exercise: currentProgramExercise.documentId,
                       exercise: currentProgramExercise.exercise.documentId,
                     },
                   });
 
-                  console.log(newWorkoutExercise);
+                  newWorkoutExercises.push(newWorkoutExercise);
+
+                  // console.log(newWorkoutExercise);
+                  const populateWorkoutExercise = await workoutExercise.findOne(
+                    {
+                      documentId: newWorkoutExercise.documentId,
+                      populate: {
+                        workout: true,
+                        exercise: true,
+                        program_exercise: true,
+                      },
+                    },
+                  );
+
+                  // console.log(populateWorkoutExercise);
                 }
+                return {
+                  workout: newWorkout,
+                  workoutExercises: newWorkoutExercises,
+                };
               }
             }
           }
@@ -119,8 +139,6 @@ module.exports = createCoreController("api::workout.workout", ({ strapi }) => ({
         ctx.response.status = 401;
         return { message: "Utilisateur non authentifié" };
       }
-
-      return "hello";
     } catch (error) {
       ctx.response.status = 500;
       return { message: error.message };
