@@ -144,4 +144,72 @@ module.exports = createCoreController("api::workout.workout", ({ strapi }) => ({
       return { message: error.message };
     }
   },
+
+  async update(ctx) {
+    try {
+      const user = ctx.state.user; //info de l'utilisateur
+      const { id } = ctx.params; //id de la séancee
+      const { workout_status } = ctx.request.body; //status de la séance
+
+      const methodWorkout = strapi.documents("api::workout.workout");
+
+      const workout = await methodWorkout.findOne({
+        documentId: id,
+        populate: { user: true },
+      });
+
+      // console.log(workout); infos de la séance
+
+      if (workout && user.id === workout.user.id) {
+        if (workout.workout_status === "in_progress") {
+          const methodWorkoutExercise = strapi.documents(
+            "api::workout-exercise.workout-exercise",
+          );
+
+          const workoutExercise = await methodWorkoutExercise.findMany({
+            filters: {
+              workout: {
+                id: {
+                  $eq: workout.id,
+                },
+              },
+            },
+          });
+
+          // console.log(workoutExercise); tableau de chaque exercices associé a la séance
+          for (const pendingWorkoutExercise of workoutExercise) {
+            if (pendingWorkoutExercise.execution_status === "PENDING") {
+              ctx.response.status = 409;
+              return { message: "Veuillez finir tous les exercices" };
+            } else {
+              const startedAt = new Date(workout.started_at);
+              // console.log(startedAt.getTime());
+
+              const duration = Math.floor(
+                (new Date().getTime() - startedAt.getTime()) / 60000,
+              );
+              console.log(duration);
+
+              const newWorkout = await methodWorkout.update({
+                documentId: id,
+                data: {
+                  workout_status: "completed",
+                  completed_at: new Date(),
+                  duration: duration,
+                },
+              });
+
+              return newWorkout;
+            }
+          }
+        }
+      } else {
+        ctx.response.status = 404;
+        return { message: "Séance introuvable" };
+      }
+    } catch (error) {
+      ctx.response.status = 500;
+      return { message: error.message };
+    }
+  },
 }));
