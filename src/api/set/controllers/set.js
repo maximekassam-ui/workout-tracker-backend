@@ -69,8 +69,6 @@ module.exports = createCoreController("api::set.set", ({ strapi }) => ({
           return { message: "workoutExerciseId est requis" };
         }
       }
-
-      return "hello";
     } catch (error) {
       ctx.response.status = 500;
       return { message: error.message };
