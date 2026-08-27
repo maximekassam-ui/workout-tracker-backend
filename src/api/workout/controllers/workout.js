@@ -212,4 +212,58 @@ module.exports = createCoreController("api::workout.workout", ({ strapi }) => ({
       return { message: error.message };
     }
   },
+  async current(ctx) {
+    try {
+      const user = ctx.state.user;
+
+      const methodWorkout = strapi.documents("api::workout.workout");
+
+      const allWorkout = await methodWorkout.findMany({
+        filters: {
+          user: {
+            id: {
+              $eq: user.id,
+            },
+          },
+          workout_status: {
+            $eq: "in_progress",
+          },
+        },
+        populate: {
+          workout_exercises: true,
+        },
+      });
+
+      if (allWorkout.length === 0) {
+        ctx.response.status = 404;
+        return { message: "Vous n'avez pas de séance en cours" };
+      } else {
+        const currentWorkout = allWorkout[0];
+
+        const allWorkoutExercises = currentWorkout.workout_exercises; //tous les exo de la séance en cours
+
+        const arrayOfWorkoutExercises = [];
+
+        for (const WorkoutExercises of allWorkoutExercises) {
+          const methodWorkoutExercises = strapi.documents(
+            "api::workout-exercise.workout-exercise",
+          );
+
+          const newWorkoutExercise = await methodWorkoutExercises.findOne({
+            documentId: WorkoutExercises.documentId,
+            populate: { exercise: true, sets: true },
+          });
+          arrayOfWorkoutExercises.push(newWorkoutExercise);
+        }
+
+        return {
+          currentWorkout: currentWorkout,
+          WorkoutExercises: arrayOfWorkoutExercises,
+        };
+      }
+    } catch (error) {
+      ctx.response.status = 500;
+      return { message: error.message };
+    }
+  },
 }));

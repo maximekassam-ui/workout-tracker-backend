@@ -1,9 +1,9 @@
-'use strict';
+"use strict";
 
 /**
  * workout router
  */
 
-const { createCoreRouter } = require('@strapi/strapi').factories;
+const { createCoreRouter } = require("@strapi/strapi").factories;
 
-module.exports = createCoreRouter('api::workout.workout');
+module.exports = createCoreRouter("api::workout.workout");
