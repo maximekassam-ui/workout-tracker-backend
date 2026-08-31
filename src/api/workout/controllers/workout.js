@@ -162,45 +162,63 @@ module.exports = createCoreController("api::workout.workout", ({ strapi }) => ({
 
       if (workout && user.id === workout.user.id) {
         if (workout.workout_status === "in_progress") {
-          const methodWorkoutExercise = strapi.documents(
-            "api::workout-exercise.workout-exercise",
-          );
+          if (workout_status === "completed") {
+            const methodWorkoutExercise = strapi.documents(
+              "api::workout-exercise.workout-exercise",
+            );
 
-          const workoutExercise = await methodWorkoutExercise.findMany({
-            filters: {
-              workout: {
-                id: {
-                  $eq: workout.id,
+            const workoutExercise = await methodWorkoutExercise.findMany({
+              filters: {
+                workout: {
+                  id: {
+                    $eq: workout.id,
+                  },
                 },
               },
-            },
-          });
+            });
 
-          // console.log(workoutExercise); tableau de chaque exercices associé a la séance
-          for (const pendingWorkoutExercise of workoutExercise) {
-            if (pendingWorkoutExercise.execution_status === "PENDING") {
-              ctx.response.status = 409;
-              return { message: "Veuillez finir tous les exercices" };
-            } else {
-              const startedAt = new Date(workout.started_at);
-              // console.log(startedAt.getTime());
-
-              const duration = Math.floor(
-                (new Date().getTime() - startedAt.getTime()) / 60000,
-              );
-              console.log(duration);
-
-              const newWorkout = await methodWorkout.update({
-                documentId: id,
-                data: {
-                  workout_status: "completed",
-                  completed_at: new Date(),
-                  duration: duration,
-                },
-              });
-
-              return newWorkout;
+            // console.log(workoutExercise); tableau de chaque exercices associé a la séance
+            for (const pendingWorkoutExercise of workoutExercise) {
+              if (pendingWorkoutExercise.execution_status === "PENDING") {
+                ctx.response.status = 409;
+                return { message: "Veuillez finir tous les exercices" };
+              }
             }
+            const startedAt = new Date(workout.started_at);
+            // console.log(startedAt.getTime());
+
+            const duration = Math.floor(
+              (new Date().getTime() - startedAt.getTime()) / 60000,
+            );
+            // console.log(duration);
+
+            const newWorkout = await methodWorkout.update({
+              documentId: id,
+              data: {
+                workout_status: "completed",
+                completed_at: new Date(),
+                duration: duration,
+              },
+            });
+
+            return newWorkout;
+          } else if (workout_status === "cancelled") {
+            const startedAt = new Date(workout.started_at);
+            // console.log(startedAt.getTime());
+
+            const duration = Math.floor(
+              (new Date().getTime() - startedAt.getTime()) / 60000,
+            );
+            // console.log(duration);
+            const newWorkout = await methodWorkout.update({
+              documentId: id,
+              data: {
+                workout_status: "cancelled",
+                duration: duration,
+              },
+            });
+
+            return newWorkout;
           }
         }
       } else {
@@ -230,7 +248,7 @@ module.exports = createCoreController("api::workout.workout", ({ strapi }) => ({
           },
         },
         populate: {
-          workout_exercises: true,
+          workout_exercises: { sort: { order: "asc" } },
         },
       });
 
@@ -256,9 +274,19 @@ module.exports = createCoreController("api::workout.workout", ({ strapi }) => ({
           arrayOfWorkoutExercises.push(newWorkoutExercise);
         }
 
+        const { workout_exercises, ...workout } = currentWorkout;
+        let workoutExerciseInPending = null;
+        // console.log(arrayOfWorkoutExercises); liste des exo de la séance en cours
+        for (const pendingWorkoutExercise of arrayOfWorkoutExercises) {
+          if (pendingWorkoutExercise.execution_status === "PENDING") {
+            workoutExerciseInPending = pendingWorkoutExercise;
+          }
+        }
+
         return {
-          currentWorkout: currentWorkout,
+          workout: workout,
           WorkoutExercises: arrayOfWorkoutExercises,
+          pendingWorkoutExercise: workoutExerciseInPending,
         };
       }
     } catch (error) {

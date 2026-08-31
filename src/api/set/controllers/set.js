@@ -53,7 +53,7 @@ module.exports = createCoreController("api::set.set", ({ strapi }) => ({
                 duration,
                 distance,
                 completed,
-                workout_exercice: workoutExercise.documentId,
+                workout_exercise: { connect: [workoutExercise.documentId] },
               },
             });
 
