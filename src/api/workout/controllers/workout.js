@@ -269,7 +269,7 @@ module.exports = createCoreController("api::workout.workout", ({ strapi }) => ({
 
           const newWorkoutExercise = await methodWorkoutExercises.findOne({
             documentId: WorkoutExercises.documentId,
-            populate: { exercise: true, sets: true },
+            populate: { exercise: true, sets: true, program_exercise: true },
           });
           arrayOfWorkoutExercises.push(newWorkoutExercise);
         }
