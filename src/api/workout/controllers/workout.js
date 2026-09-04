@@ -235,6 +235,9 @@ module.exports = createCoreController("api::workout.workout", ({ strapi }) => ({
       const user = ctx.state.user;
 
       const methodWorkout = strapi.documents("api::workout.workout");
+      const methodWorkoutExercises = strapi.documents(
+        "api::workout-exercise.workout-exercise",
+      );
 
       const allWorkout = await methodWorkout.findMany({
         filters: {
@@ -263,10 +266,6 @@ module.exports = createCoreController("api::workout.workout", ({ strapi }) => ({
         const arrayOfWorkoutExercises = [];
 
         for (const WorkoutExercises of allWorkoutExercises) {
-          const methodWorkoutExercises = strapi.documents(
-            "api::workout-exercise.workout-exercise",
-          );
-
           const newWorkoutExercise = await methodWorkoutExercises.findOne({
             documentId: WorkoutExercises.documentId,
             populate: { exercise: true, sets: true, program_exercise: true },
@@ -283,10 +282,39 @@ module.exports = createCoreController("api::workout.workout", ({ strapi }) => ({
           }
         }
 
+        const lastWorkoutEx = await methodWorkoutExercises.findMany({
+          filters: {
+            exercise: {
+              id: {
+                $eq: workoutExerciseInPending.exercise.id,
+              },
+            },
+            workout: {
+              workout_status: {
+                $eq: "completed",
+              },
+            },
+          },
+          populate: {
+            workout: true,
+            sets: true,
+          },
+        });
+
+        const lastWorkoutExercise = lastWorkoutEx.sort(
+          (a, b) =>
+            new Date(b.workout.completed_at) - new Date(a.workout.completed_at),
+        )[0];
+
+        // console.log("DERNIERE SEANCE", lastWorkoutExercise);
+
+        const previousSets = lastWorkoutExercise.sets;
+
         return {
           workout: workout,
           WorkoutExercises: arrayOfWorkoutExercises,
           pendingWorkoutExercise: workoutExerciseInPending,
+          previousSets: previousSets,
         };
       }
     } catch (error) {
