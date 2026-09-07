@@ -279,6 +279,7 @@ module.exports = createCoreController("api::workout.workout", ({ strapi }) => ({
         for (const pendingWorkoutExercise of arrayOfWorkoutExercises) {
           if (pendingWorkoutExercise.execution_status === "PENDING") {
             workoutExerciseInPending = pendingWorkoutExercise;
+            break;
           }
         }
 
@@ -301,15 +302,21 @@ module.exports = createCoreController("api::workout.workout", ({ strapi }) => ({
           },
         });
 
-        const lastWorkoutExercise = lastWorkoutEx.sort(
-          (a, b) =>
-            new Date(b.workout.completed_at) - new Date(a.workout.completed_at),
-        )[0];
+        let previousSets = [];
 
-        // console.log("DERNIERE SEANCE", lastWorkoutExercise);
+        if (lastWorkoutEx.length > 0) {
+          const lastWorkoutExercise = lastWorkoutEx.sort(
+            (a, b) =>
+              new Date(b.workout.completed_at) -
+              new Date(a.workout.completed_at),
+          )[0];
 
-        const previousSets = lastWorkoutExercise.sets;
+          console.log("DERNIERE SEANCE", lastWorkoutExercise);
 
+          if (lastWorkoutExercise.sets) {
+            previousSets = lastWorkoutExercise.sets;
+          }
+        }
         return {
           workout: workout,
           WorkoutExercises: arrayOfWorkoutExercises,
