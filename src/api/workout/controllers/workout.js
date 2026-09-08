@@ -282,41 +282,44 @@ module.exports = createCoreController("api::workout.workout", ({ strapi }) => ({
             break;
           }
         }
-
-        const lastWorkoutEx = await methodWorkoutExercises.findMany({
-          filters: {
-            exercise: {
-              id: {
-                $eq: workoutExerciseInPending.exercise.id,
-              },
-            },
-            workout: {
-              workout_status: {
-                $eq: "completed",
-              },
-            },
-          },
-          populate: {
-            workout: true,
-            sets: true,
-          },
-        });
-
         let previousSets = [];
+        if (workoutExerciseInPending) {
+          const lastWorkoutEx = await methodWorkoutExercises.findMany({
+            filters: {
+              exercise: {
+                id: {
+                  $eq: workoutExerciseInPending.exercise.id,
+                },
+              },
+              workout: {
+                workout_status: {
+                  $eq: "completed",
+                },
+              },
+            },
+            populate: {
+              workout: true,
+              sets: true,
+            },
+          });
 
-        if (lastWorkoutEx.length > 0) {
-          const lastWorkoutExercise = lastWorkoutEx.sort(
-            (a, b) =>
-              new Date(b.workout.completed_at) -
-              new Date(a.workout.completed_at),
-          )[0];
+          if (lastWorkoutEx.length > 0) {
+            const lastWorkoutExercise = lastWorkoutEx.sort(
+              (a, b) =>
+                new Date(b.workout.completed_at) -
+                new Date(a.workout.completed_at),
+            )[0];
 
-          console.log("DERNIERE SEANCE", lastWorkoutExercise);
+            console.log("DERNIERE SEANCE", lastWorkoutExercise);
 
-          if (lastWorkoutExercise.sets) {
-            previousSets = lastWorkoutExercise.sets;
+            if (lastWorkoutExercise.sets) {
+              previousSets = lastWorkoutExercise.sets;
+            }
           }
+        } else {
+          workoutExerciseInPending = null;
         }
+
         return {
           workout: workout,
           WorkoutExercises: arrayOfWorkoutExercises,
@@ -324,6 +327,35 @@ module.exports = createCoreController("api::workout.workout", ({ strapi }) => ({
           previousSets: previousSets,
         };
       }
+    } catch (error) {
+      ctx.response.status = 500;
+      return { message: error.message };
+    }
+  },
+  async history(ctx) {
+    try {
+      const user = ctx.state.user;
+      const methodWorkouts = strapi.documents("api::workout.workout");
+
+      const allWorkoutHistory = await methodWorkouts.findMany({
+        filters: {
+          user: {
+            id: {
+              $eq: user.id,
+            },
+          },
+          workout_status: {
+            $eq: "completed",
+          },
+        },
+        populate: {
+          workout_template: true,
+          workout_exercises: { populate: ["exercise", "sets"] },
+        },
+        sort: { completed_at: "desc" },
+      });
+
+      return allWorkoutHistory;
     } catch (error) {
       ctx.response.status = 500;
       return { message: error.message };
