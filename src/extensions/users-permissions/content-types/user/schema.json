@@ -70,7 +70,7 @@
       "type": "relation",
       "relation": "oneToMany",
       "target": "api::program.program",
-      "mappedBy": "users_permissions_user"
+      "mappedBy": "user"
     },
     "workouts": {
       "type": "relation",
