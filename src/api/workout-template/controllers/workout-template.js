@@ -46,6 +46,7 @@ module.exports = createCoreController(
                 description: description,
                 program: documentId,
               },
+              status: "published",
             });
 
             return workoutTemplate;
